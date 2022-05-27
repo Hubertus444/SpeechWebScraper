@@ -9,7 +9,7 @@ Data features the speech, its author, the date, optionally subtitles, footnotes 
 
 module structure:
 - SpeechScraper
-|
+| \n
 | - URLScraper
 | |
 | | - BisURLScraper
