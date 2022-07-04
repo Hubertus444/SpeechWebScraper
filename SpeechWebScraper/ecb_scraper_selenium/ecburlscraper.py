@@ -5,8 +5,8 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from urlscraper import URLScraper
-from utils import progress_bar
+from cb_speech_scraper.urlscraper import URLScraper
+from cb_speech_scraper.utils import progress_bar
 
 
 class EcbURLScraper(URLScraper):

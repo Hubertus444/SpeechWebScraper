@@ -8,7 +8,7 @@ from selenium import webdriver
 
 from cb_speech_scraper.utils import progress_bar
 from ecb_scraper_selenium.ecbpagescraper import EcbPageScraper
-from ecburlscraper import EcbURLScraper
+from ecb_scraper_selenium.ecburlscraper import EcbURLScraper
 from cb_speech_scraper.timer import Timer
 from cb_speech_scraper.data_wrangling import save_data_dict_to_csv, open_data_dict_from_csv
 from cb_speech_scraper.utils import save_data_to_json, open_json_to_data
@@ -28,9 +28,9 @@ def run():
     fails = 0
 
     TEST = "_test" if IS_TEST_RUN else ""
-    PDF_FILE_PATH = "pdf_files/file.pdf"
+    PDF_FILE_PATH = "ecb_scraper_selenium/pdf_files/file.pdf"
     COMPLETE_DATA_SAVE_PATH = f"data/ecb_speech{TEST}.csv"
-    URL_SAVE_PATH = r"data/"
+    URL_SAVE_PATH = r"ecb_scraper_selenium/data/"
     URL_CSV_FILENAME = f"ecb_url{TEST}.csv"
     URL_JSON_FILENAME = f"ecb_url{TEST}.json"
     COMPLETE_DATA_JSON_SAVE_PATH = f"data/ecb_speech{TEST}.json"

@@ -3,14 +3,15 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from pagescraper import PageScraper
+from cb_speech_scraper.pagescraper import PageScraper
 
 
 class EcbPageScraper(PageScraper):
-    """Scrape central bankers speech data from a singular ECB web page representing a speech"""
+    """Scrape central bankers speech data from a single ECB web page representing a single speech"""
 
     def __init__(self, driver, url, pdf_file_path):
         super().__init__(driver, url, pdf_file_path)
+        self.data_dict = self.scrape_page()
 
     def scrape_page(self) -> dict:
         """
@@ -20,8 +21,9 @@ class EcbPageScraper(PageScraper):
         if (self.url_contains_pdf(self.url)
                 or self.url_contains_pdf(self.driver.current_url)):
             speech_text = self.scrape_pdf_file_from(self.url)
-            classification, title_text, subtitle_text, location_date \
-                = self.NA, self.NA, self.NA, self.NA
+            classification = "slideshow"
+            title_text, subtitle_text, location_date \
+                = self.NA, self.NA, self.NA
             footnotes_dict, related_topics_list = {}, []
         else:
             title = self.__extract_title_element()
@@ -37,12 +39,15 @@ class EcbPageScraper(PageScraper):
 
             footnotes_dict = self.__get_footnotes_dict()
             related_topics_list = self.__get_related_topics()
+
+        # update self.data_dict instead in main
+        # self.data_dict = { data here }
         return {
-            "subtitle": subtitle_text,
+            "p_subtitle": subtitle_text,
             "speech": speech_text,
             "footnotes": footnotes_dict,
-            "url": self.url,
-            "title": title_text,
+            "p_url": self.url,
+            "p_title": title_text,
             "related_topics": related_topics_list,
             "locdate": location_date,
             "classification": classification
@@ -56,7 +61,7 @@ class EcbPageScraper(PageScraper):
         '''
         try:
             return title.find_element(By.TAG_NAME, 'ul').text
-        except NoSuchElementException:
+        except (NoSuchElementException, AttributeError):
             self.print_error_message("classification")
 
     def __get_title_text_from_title(self, title) -> str:
@@ -68,7 +73,7 @@ class EcbPageScraper(PageScraper):
 
         try:
             return title.find_element(By.TAG_NAME, 'h1').text
-        except NoSuchElementException:
+        except (NoSuchElementException, AttributeError):
             self.print_error_message("title")
 
     def __extract_section_list(self) -> [WebElement]:
@@ -87,24 +92,27 @@ class EcbPageScraper(PageScraper):
             self.print_error_message("no sections at all")
 
     def __get_speech_text_from_section_list(self, section_list) -> str:
-        speech = ""
-        for section in section_list:
-            speech += section.text.strip() + '\n'
+        try:
+            speech = ""
+            for section in section_list:
+                speech += section.text.strip() + '\n'
 
-        return speech
+            return speech
+        except TypeError:
+            self.print_error_message("section_list is NoneType")
 
     def __get_subtitle_from_section_list(self, section_list) -> str:
-        section = section_list[0]
         try:
+            section = section_list[0]
             return section.find_element(By.CSS_SELECTOR, 'h2.ecb-pressContentSubtitle').text
-        except NoSuchElementException:
+        except (NoSuchElementException, TypeError):
             self.print_error_message("subtitle")
 
     def __get_location_date_from_section_list(self, section_list) -> str:
-        section = section_list[0]
         try:
+            section = section_list[0]
             return section.find_element(By.CSS_SELECTOR, 'p.ecb-publicationDate').text
-        except NoSuchElementException:
+        except (NoSuchElementException, TypeError):
             self.print_error_message("locdate")
 
     def __get_footnotes_dict(self) -> {int: str}:
@@ -139,7 +147,7 @@ class EcbPageScraper(PageScraper):
         except NoSuchElementException:
             self.print_error_message("related topics")
 
-    def __extract_title_element(self):
+    def __extract_title_element(self) -> WebElement:
         try:
             return self.driver.find_element(By.CSS_SELECTOR, 'div.title')
         except NoSuchElementException:
